@@ -263,10 +263,15 @@ const EnvelopeSection = () => {
 const App = () => {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 2.0, 
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      // CHANGE THIS LINE: 1.2 is standard. 3.0 is "Heavy Luxury".
+      duration: 3.0, 
+      
+      // THIS CURVE: Starts fast, glides to a very slow stop.
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+      
       smooth: true,
-      wheelMultiplier: 1.5,
+      smoothTouch: false,
+      touchMultiplier: 2,
     });
     function raf(time) {
       lenis.raf(time);
@@ -275,7 +280,6 @@ const App = () => {
     requestAnimationFrame(raf);
     return () => lenis.destroy();
   }, []);
-
   return (
     <div className="w-full min-h-screen bg-[#EBEBEB] text-[#1C1C1C] font-sans cursor-auto md:cursor-none selection:bg-[#1C1C1C] selection:text-white overflow-x-hidden">
       <Cursor />
