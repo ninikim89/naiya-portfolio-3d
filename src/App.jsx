@@ -31,7 +31,7 @@ const SkillText = ({ text, position, rotation }) => {
 );
 };
 
-// --- 2. THE BLACK CRYSTAL (FIXED PHYSICS) ---
+// --- 2. THE BLACK CRYSTAL ---
 const BlackCrystal = () => {
   const meshRef = useRef();
   const groupRef = useRef();
@@ -41,18 +41,16 @@ const BlackCrystal = () => {
   const previousMouse = useRef({ x: 0, y: 0 });
   const velocity = useRef({ x: 0, y: 0 }); 
 
-  // --- EVENTS ---
   const onPointerDown = (e) => {
     isDragging.current = true;
     previousMouse.current = { x: e.clientX, y: e.clientY };
     velocity.current = { x: 0, y: 0 }; 
     e.stopPropagation();
-    document.body.style.cursor = 'grabbing';
+    // cursor styling handled in CSS/container
   };
 
   const onPointerUp = () => {
     isDragging.current = false;
-    document.body.style.cursor = 'none';
   };
 
   const onPointerMove = (e) => {
@@ -74,7 +72,6 @@ const BlackCrystal = () => {
     }
   };
 
-  // GLOBAL EVENT LISTENERS
   useEffect(() => {
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointermove', onPointerMove);
@@ -94,13 +91,12 @@ const BlackCrystal = () => {
         velocity.current.x *= friction;
         velocity.current.y *= friction;
 
-        // IDLE SPIN (Rotates Up-to-Down)
+        // IDLE SPIN
         groupRef.current.rotation.x += delta * 0.3;
       }
     }
   });
 
-  // GEOMETRY
   const textData = useMemo(() => {
     const geo = new THREE.IcosahedronGeometry(1, 0); 
     const pos = geo.attributes.position;
@@ -109,16 +105,13 @@ const BlackCrystal = () => {
       const a = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
       const b = new THREE.Vector3(pos.getX(i+1), pos.getY(i+1), pos.getZ(i+1));
       const c = new THREE.Vector3(pos.getX(i+2), pos.getY(i+2), pos.getZ(i+2));
-
       const center = new THREE.Vector3().addVectors(a, b).add(c).divideScalar(3);
-
       const dummy = new THREE.Object3D();
       dummy.position.copy(center);
       dummy.lookAt(0, 0, 0); 
       dummy.rotateY(Math.PI); 
       dummy.rotateZ(Math.PI); 
       const textPos = center.multiplyScalar(1.01);
-
        faces.push({ pos: textPos, rot: dummy.rotation });
     }
     return skills.map((skill, i) => {
@@ -142,9 +135,7 @@ const BlackCrystal = () => {
           />
         </mesh>
         {textData.map((item, index) => (
-          <SkillText key={index}  text={item.text} 
-            position={item.pos} 
-            rotation={item.rot} />
+          <SkillText key={index}  text={item.text} position={item.pos} rotation={item.rot} />
         ))}
       </group>
     </Float>
@@ -163,26 +154,21 @@ const Shapes = () => {
   );
 };
 
-// --- 3. UI COMPONENTS (UPDATED FOR MOBILE RESPONSIVENESS) ---
+// --- 3. UI COMPONENTS ---
 const ScatterCard = ({ title, category, rotation, image, zIndex }) => {
-  // Simple check for mobile screen width
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <motion.div 
-      drag={!isMobile} // Disable drag on mobile so you can scroll the page
+      drag={!isMobile} 
       dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
       whileHover={{ scale: 1.1, zIndex: 100, rotate: 0 }}
-      // ON MOBILE: Relative positioning (stacks vertically), margin bottom for spacing
-      // ON DESKTOP: Absolute positioning (scattered), no margin
       className="relative md:absolute top-0 left-0 w-full md:w-[350px] h-[450px] bg-white rounded-xl shadow-2xl overflow-hidden cursor-pointer md:cursor-grab md:active:cursor-grabbing border-4 border-white mb-8 md:mb-0"
       style={{ 
         zIndex: zIndex, 
-        // Force positions to 0 on mobile so they stack cleanly
         x: isMobile ? 0 : Math.random() * 20, 
         y: isMobile ? 0 : Math.random() * 20 
       }}
-      // Force rotation to 0 on mobile
       initial={{ rotate: isMobile ? 0 : rotation }}
     >
       <img src={image} alt={title} className="w-full h-full object-cover pointer-events-none" />
@@ -197,7 +183,6 @@ const ScatterCard = ({ title, category, rotation, image, zIndex }) => {
 const Cursor = () => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   useEffect(() => {
-    // Only verify cursor on desktop
     if(window.innerWidth > 768) {
         const move = (e) => setMouse({ x: e.clientX, y: e.clientY });
         window.addEventListener("mousemove", move);
@@ -219,28 +204,21 @@ const EnvelopeSection = () => {
 
   return (
     <section className="relative w-full h-auto py-32 flex flex-col items-center justify-center overflow-visible bg-[#ffffff] z-50">
-      
-      {/* Background Title */}
       <h1 className="absolute top-10 text-center text-gray-300 text-[10vw] font-black opacity-20 pointer-events-none uppercase tracking-tighter leading-none">
         About Me 
       </h1>
 
-      {/* Added scale for mobile so it fits screen */}
-      <div className="relative w-[300px] h-[200px] flex items-center justify-center z-10 scale-[0.7] md:scale-100 origin-center">
+      {/* SCALE FIX: Increased from 0.7 to 0.9 for mobile */}
+      <div className="relative w-[300px] h-[200px] flex items-center justify-center z-10 scale-[0.9] md:scale-100 origin-center">
         
-        {/* --- THE COLLAGE EXPLOSION --- */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
               initial={{ scale: 0.8, y: 100, opacity: 0, rotate: 5 }}
               animate={{ scale: 1, y: -200, opacity: 1, rotate: -2 }} 
-              transition={{ 
-                duration: 1.6, 
-                ease: [0.22, 1, 0.36, 1] 
-              }}
+              transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
               drag
-              // Adjusted width for responsiveness
-              className="absolute w-[80vw] md:w-[1000px] cursor-grab active:cursor-grabbing z-50 left-[-40vw] md:-left-[75px]" 
+              className="absolute w-[85vw] md:w-[1000px] cursor-grab active:cursor-grabbing z-50 left-[-42vw] md:-left-[75px]" 
             >
               <img 
                 src={heroImg} 
@@ -252,7 +230,6 @@ const EnvelopeSection = () => {
           )}
         </AnimatePresence>
 
-        {/* --- THE ENVELOPE --- */}
         <motion.div 
             animate={
                 isOpen 
@@ -274,7 +251,6 @@ const EnvelopeSection = () => {
                     <span className="text-white font-serif font-bold text-xl">N</span>
                 </div>
             </div>
-            {/* Flap */}
             <div className="w-0 h-0 border-l-[160px] border-l-transparent border-r-[160px] border-r-transparent border-t-[100px] border-t-[#c0c0c0] absolute top-0"></div>
         </motion.div>
 
@@ -316,8 +292,13 @@ const App = () => {
           <div className="uppercase font-bold tracking-widest text-xs">Available for work</div>
         </nav>
 
+        {/* HERO GRID: 2 Columns on Desktop. 
+            Mobile: Text Top, Crystal Bottom. 
+            Desktop: Text Left, Crystal Right (No overlap) */}
         <div className="grid grid-cols-1 md:grid-cols-2 h-full items-center relative">
-          <div className="z-10 relative mt-20 md:mt-0">
+          
+          {/* TEXT COL */}
+          <div className="z-10 relative mt-20 md:mt-0 order-1 md:order-1">
             <h1 className="text-[15vw] md:text-[10vw] leading-[0.85] font-black uppercase tracking-tighter text-[#1C1C1C]">
               Creative<br />Dev.
             </h1>
@@ -326,8 +307,8 @@ const App = () => {
             </p>
           </div>
           
-          {/* THE BLACK CRYSTAL - Changed to RELATIVE on mobile so it sits BELOW text */}
-          <div className="relative h-[50vh] w-full md:absolute md:top-0 md:right-0 md:w-full md:h-full opacity-100 cursor-grab active:cursor-grabbing z-0">
+          {/* CRYSTAL COL */}
+          <div className="relative w-full h-[50vh] md:h-full order-2 md:order-2 z-0 cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
               <Shapes /> 
           </div>
         </div>
@@ -357,7 +338,6 @@ const App = () => {
         </p>
       </div>
 
-      {/* UPDATED: Flex Column for mobile stacking */}
       <section className="relative w-full min-h-auto md:min-h-[120vh] py-12 md:py-24 px-6 md:px-12 flex flex-col items-center">
         <div className="relative w-full max-w-5xl h-auto md:h-[800px] flex flex-col md:block justify-center items-center gap-8">
           <ScatterCard title="Decent Restaurant" category="Web Design" rotation={-6} image="/Screenshot_2025-12-16-00-07-17-698_com.android.chrome-edit.jpg" zIndex={1} />
