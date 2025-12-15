@@ -177,14 +177,25 @@ const Shapes = () => {
   );
 };
 
-// --- 3. UI COMPONENTS ---
-const ScatterCard = ({ title, category, rotation, image, zIndex }) => (
+// --- 3. UI COMPONENTS (UPDATED FOR MOBILE RESPONSIVENESS) ---
+const ScatterCard = ({ title, category, rotation, image, zIndex }) => {
+  // Check if we are on mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  return (
   <motion.div 
-    drag dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
+    drag={!isMobile} // Disable drag on mobile to allow scrolling
+    dragConstraints={{ left: -100, right: 100, top: -100, bottom: 100 }}
     whileHover={{ scale: 1.1, zIndex: 100, rotate: 0 }}
-    className="absolute top-0 left-0 w-[300px] md:w-[350px] h-[450px] bg-white rounded-xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing border-4 border-white"
-    style={{ zIndex: zIndex, x: Math.random() * 20, y: Math.random() * 20 }}
-    initial={{ rotate: rotation }}
+    // CSS: Relative on Mobile (Stacks), Absolute on Desktop (Scatters)
+    className="relative md:absolute top-0 left-0 w-[300px] md:w-[350px] h-[450px] bg-white rounded-xl shadow-2xl overflow-hidden cursor-pointer md:cursor-grab md:active:cursor-grabbing border-4 border-white mb-8 md:mb-0"
+    style={{ 
+        zIndex: zIndex, 
+        // Only random position on desktop
+        x: isMobile ? 0 : Math.random() * 20, 
+        y: isMobile ? 0 : Math.random() * 20 
+    }}
+    initial={{ rotate: isMobile ? 0 : rotation }}
   >
     <img src={image} alt={title} className="w-full h-full object-cover pointer-events-none" />
     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6">
@@ -192,23 +203,28 @@ const ScatterCard = ({ title, category, rotation, image, zIndex }) => (
       <span className="text-xs text-white/80 font-mono uppercase mt-2">{category}</span>
     </div>
   </motion.div>
-);
+  );
+};
 
 const Cursor = () => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   useEffect(() => {
-    const move = (e) => setMouse({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
+    // Only verify cursor on desktop
+    if(window.innerWidth > 768) {
+        const move = (e) => setMouse({ x: e.clientX, y: e.clientY });
+        window.addEventListener("mousemove", move);
+        return () => window.removeEventListener("mousemove", move);
+    }
   }, []);
   return (
     <motion.div
-      className="fixed top-0 left-0 w-8 h-8 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
+      className="hidden md:block fixed top-0 left-0 w-8 h-8 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
       animate={{ x: mouse.x - 16, y: mouse.y - 16 }}
       transition={{ type: "spring", stiffness: 500, damping: 28 }}
     />
   );
 };
+
 // --- 5. ENVELOPE SECTION (SINGLE COLLAGE FLY-OUT) ---
 const EnvelopeSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -226,7 +242,7 @@ const EnvelopeSection = () => {
         {/* --- THE COLLAGE EXPLOSION --- */}
         <AnimatePresence>
           {isOpen && (
-           <motion.div
+            <motion.div
               initial={{ scale: 0.8, y: 100, opacity: 0, rotate: 5 }}
               animate={{ scale: 1, y: -200, opacity: 1, rotate: -2 }} 
               // FIX 2: The Luxury Curve (Bezier). Starts fast, lands soft.
@@ -236,7 +252,7 @@ const EnvelopeSection = () => {
               }}
               drag
               // This container holds your single collage image
-             className="absolute w-[1000px] cursor-grab active:cursor-grabbing z-50 -left-[75px] md:-left-[75px]" 
+              className="absolute w-[1000px] cursor-grab active:cursor-grabbing z-50 -left-[75px] md:-left-[75px]" 
             >
               <img 
                 src={heroImg} 
@@ -279,6 +295,7 @@ const EnvelopeSection = () => {
     </section>
   );
 };
+
 // --- 4. MAIN APP ---
 const App = () => {
   // HEAVY LENIS SCROLL
@@ -298,7 +315,7 @@ const App = () => {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[#EBEBEB] text-[#1C1C1C] font-sans cursor-none selection:bg-[#1C1C1C] selection:text-white">
+    <div className="w-full min-h-screen bg-[#EBEBEB] text-[#1C1C1C] font-sans cursor-auto md:cursor-none selection:bg-[#1C1C1C] selection:text-white">
       <Cursor />
       
 
@@ -326,14 +343,14 @@ const App = () => {
             </p>
           </div>
           
-         {/* THE BLACK CRYSTAL */}
+          {/* THE BLACK CRYSTAL */}
           <div className="absolute md:relative top-0 right-0 w-full h-full opacity-100 cursor-grab active:cursor-grabbing">
-             <Shapes /> 
+              <Shapes /> 
           </div>
         </div>
       </section>
 
-     
+      
 
 
       {/* MARQUEE */}
@@ -352,13 +369,17 @@ const App = () => {
       </div>
 
       {/* WORK SECTION */}
-      <div className="text-center mb-24 z-10">
+      <div className="text-center mb-12 md:mb-24 z-10">
         <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter">Selected<br/>Work</h2>
-        <p className="mt-4 text-xl font-serif italic text-gray-500">( Drag the cards to explore )</p>
+        <p className="mt-4 text-xl font-serif italic text-gray-500">
+            <span className="md:hidden">( Scroll to explore )</span>
+            <span className="hidden md:block">( Drag the cards to explore )</span>
+        </p>
       </div>
 
-      <section className="relative w-full min-h-[120vh] py-24 px-6 md:px-12 flex flex-col items-center">
-        <div className="relative w-full max-w-5xl h-[800px] flex justify-center items-center">
+      {/* MODIFIED: Flex-col for mobile stacking, min-h auto on mobile */}
+      <section className="relative w-full min-h-auto md:min-h-[120vh] py-12 md:py-24 px-6 md:px-12 flex flex-col items-center">
+        <div className="relative w-full max-w-5xl h-auto md:h-[800px] flex flex-col md:block justify-center items-center gap-8">
           <ScatterCard title="Decent Restaurant" category="Web Design" rotation={-6} image="/Screenshot_2025-12-16-00-07-17-698_com.android.chrome-edit.jpg" zIndex={1} />
           <ScatterCard title="Digital Store" category="Shopify" rotation={-12} image="https://i.pinimg.com/736x/7a/f9/f8/7af9f8b2e5bd6efd5fda10ef99ebb127.jpg" zIndex={3} />
           <ScatterCard title="AI Vision" category="Python" rotation={4} image="https://i.pinimg.com/736x/95/a1/99/95a1999d18f033934c303a6972d21c7c.jpg" zIndex={2} />
@@ -369,40 +390,48 @@ const App = () => {
             image="https://i.pinimg.com/736x/ed/10/53/ed10532bb3eaa7bbd80d6d3bda4207f2.jpg"
             zIndex={4} 
           />
-
         </div>
       </section>
-            <EnvelopeSection />
-       {/* FOOTER */}
 
-      {/* FOOTER */}
-      <footer className="w-full bg-[#1C1C1C] text-[#EBEBEB] py-20 px-8">
-        <h2 className="text-[10vw] leading-[0.8] font-bold uppercase mb-8">Let's Talk</h2>
+      <EnvelopeSection />
+
+      {/* FOOTER (FIXED LAYOUT) */}
+      <footer className="w-full bg-[#1C1C1C] text-[#EBEBEB] py-20 px-6 md:px-12 flex flex-col justify-between">
+        
+        {/* TOP ROW: Header + Contact Info */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
+            <h2 className="text-[12vw] leading-[0.8] font-bold uppercase mb-8 md:mb-0">Let's Talk</h2>
 
             <div className="flex flex-col items-start md:items-end gap-2">
-      <a href="mailto:naiya.dave@email.com" className="text-2xl md:text-3xl font-serif italic hover:text-[#FF4D22] transition-colors">
-        davekusum827@email.com
-      </a>
-      
-      {/* Live Status & Location */}
-      <div className="flex flex-col items-start md:items-end opacity-50 font-mono text-xs uppercase tracking-widest mt-2 gap-1">
-        <p>Mahesana, India</p>
-        <div className="flex items-center gap-2 text-green-400">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </span>
-          Available for Work
+                <a href="mailto:davekusum827@email.com" className="text-2xl md:text-3xl font-serif italic hover:text-[#FF4D22] transition-colors">
+                    davekusum827@email.com
+                </a>
+                
+                {/* Live Status & Location */}
+                <div className="flex flex-col items-start md:items-end opacity-50 font-mono text-xs uppercase tracking-widest mt-2 gap-1">
+                    <p>Mahesana, India</p>
+                    <div className="flex items-center gap-2 text-green-400">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    Available for Work
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-        <div className="flex gap-6 text-xl">
-           <a href="https://www.linkedin.com/in/naiya-dave-9265a330b/" className="hover:text-orange-500">LinkedIn</a>
-           <a href="https://github.com/ninikim89" className="hover:text-orange-500">GitHub</a>
-           <a href="https://www.instagram.com/naiyawq/" className="hover:text-orange-500">Instagram</a>
-        </div>
-       <span className="opacity-40 font-mono text-xs">© 2025 Naiya Dave</span>
-      </footer>
+
+        {/* BOTTOM ROW: Links + Copyright */}
+        <div className="w-full border-t border-[#333] pt-8 flex flex-col md:flex-row justify-between items-center text-sm font-bold uppercase tracking-widest gap-4 md:gap-0">
+            <div className="flex gap-6 text-xl md:text-sm">
+                <a href="https://www.linkedin.com/in/naiya-dave-9265a330b/" className="hover:text-orange-500">LinkedIn</a>
+                <a href="https://github.com/ninikim89" className="hover:text-orange-500">GitHub</a>
+                <a href="https://www.instagram.com/naiyawq/" className="hover:text-orange-500">Instagram</a>
+            </div>
+            <span className="opacity-40 font-mono text-xs">© 2025 Naiya Dave</span>
+        </div>
+
+      </footer>
     </div>
   );
 };
