@@ -209,7 +209,7 @@ const EnvelopeSection = () => {
       </h1>
 
       {/* SCALE FIX: Increased from 0.7 to 0.9 for mobile */}
-      <div className="relative w-[300px] h-[200px] flex items-center justify-center z-10 scale-[0.5] md:scale-100 origin-center">
+      <div className="relative w-[300px] h-[200px] flex items-center justify-center z-10 scale-[100] md:scale-100 origin-center">
         
         <AnimatePresence>
           {isOpen && (
