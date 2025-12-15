@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* IMPORTANT: Hide scrollbar but keep native scrolling OFF */
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #EBEBEB;
+  overflow-x: hidden;
+}
+
+/* Add to src/index.css */
+.skill-label {
+  font-family: 'Inter', sans-serif; /* Or your system font */
+  font-weight: 900;
+  font-size: 14px; /* Adjust size here easily */
+  color: white;
+  user-select: none;
+  pointer-events: none; /* Crucial: lets you click "through" text to drag crystal */
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(0,0,0,0.5); /* Pop against background */
+}
