@@ -264,7 +264,7 @@ const App = () => {
   useEffect(() => {
     const lenis = new Lenis({
       // CHANGE THIS LINE: 1.2 is standard. 3.0 is "Heavy Luxury".
-      duration: 3.0, 
+      duration: 4.0, 
       
       // THIS CURVE: Starts fast, glides to a very slow stop.
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
