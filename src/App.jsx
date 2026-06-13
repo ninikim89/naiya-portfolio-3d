@@ -347,6 +347,7 @@ const App = () => {
           <ScatterCard title="Decent Restaurant" category="Web Design" rotation={-6} image="/Screenshot_2025-12-16-00-07-17-698_com.android.chrome-edit.jpg" zIndex={1} />
           <ScatterCard title="Digital Store" category="Shopify" rotation={-12} image="https://i.pinimg.com/736x/7a/f9/f8/7af9f8b2e5bd6efd5fda10ef99ebb127.jpg" zIndex={3} />
           <ScatterCard title="AI Vision" category="Python" rotation={4} image="https://i.pinimg.com/736x/95/a1/99/95a1999d18f033934c303a6972d21c7c.jpg" zIndex={2} />
+          <ScatterCard title="SacNoir Bag" category="Next.js" rotation={4} image="/sacnoir.png" zIndex={2} />
           <ScatterCard 
             title="Digit Recognition" 
             category="Deep Learning" 
